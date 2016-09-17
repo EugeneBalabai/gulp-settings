@@ -1,0 +1,63 @@
+#makeoffer,#makeoffer2,.makeoffer{
+  display: none;
+  padding: 20px;
+  width: 340px;
+  h4{
+    color: #171D21;
+    font-size: 24px;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  input{
+    width: 300px;
+    height: 44px;
+    background-color: #FFF;
+    border: 1px solid #E1E1E1;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border-radius: 6px;
+    color: #303030;
+    font-size: 16px;
+    font-weight: 400;
+    padding-left: 40px;
+    padding-right: 30px;
+    background-repeat: no-repeat;
+    margin-bottom: 20px;
+  }
+  [name=name]{
+    background-position: 11px center;
+    background-image: url(../images/ico-form-name.png);
+  }
+  [name=phone]{
+    background-position: 14px center;
+    background-image: url(../images/ico-form-phone.png);
+  }
+  .btn{
+    width: 100%;
+    margin-top: 20px;
+  }
+}
+#sucsess{
+  display: none;
+  width: 300px;
+  padding: 0 40px;
+  background-color: #fff;
+  border-radius: 3px;
+  p{
+    font-size: 28px;
+    text-align: center;
+    color: #000;
+  }
+}
+.makeoffer{
+  display: block;
+}
+.btn{
+  display: inline-block;
+  border: 0;
+  vertical-align: middle;
+  text-align: center;
+  transition: all .1s;
+  &:hover{transform: scale(1.1);}
+}
