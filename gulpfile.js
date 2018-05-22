@@ -1,5 +1,3 @@
-//npm init
-//npm install gulp gulp-watch gulp-autoprefixer gulp-uglify gulp-sass gulp-sourcemaps gulp-rigger gulp-clean-css gulp-tinypng-compress browser-sync --save-dev
 'use strict';
 
 var gulp = require('gulp'),
@@ -7,9 +5,11 @@ var gulp = require('gulp'),
     prefixer = require('gulp-autoprefixer'),
     uglify = require('gulp-uglify'),
     sass = require('gulp-sass'),
-    sourcemaps = require('gulp-sourcemaps'),
     rigger = require('gulp-rigger'),
-    cleanCSS  = require('gulp-clean-css'),
+    cleanCSS = require('gulp-clean-css'),
+    svgmin = require('gulp-svgmin'),
+    svgstore = require('gulp-svgstore'),
+    svgpath = require('path'),
     tinypng = require('gulp-tinypng-compress'),
     browserSync = require("browser-sync"),
     reload = browserSync.reload;
@@ -20,21 +20,24 @@ var path = {
         js: 'build/js/',
         css: 'build/css/',
         img: 'build/images/',
-        fonts: 'build/fonts/'
+        fonts: 'build/fonts/',
+        svg: 'build/images/'
     },
     dev: {
         html: 'dev/*.html',
         js: 'dev/js/*.js',
         style: 'dev/style/style.scss',
         img: 'dev/images/**/*.{png,jpg,jpeg}',
-        fonts: 'dev/fonts/**/*.*'
+        fonts: 'dev/fonts/**/*.*',
+        svg: 'dev/images/**/*.svg'
     },
     watch: {
         html: 'dev/**/*.html',
         js: 'dev/js/**/*.js',
         style: 'dev/style/**/*.*',
         img: 'dev/images/**/*.{png,jpg,jpeg}',
-        fonts: 'dev/fonts/**/*.*'
+        fonts: 'dev/fonts/**/*.*',
+        svg: 'dev/images/**/*.svg'
     },
     clean: './build'
 };
@@ -55,31 +58,35 @@ gulp.task('webserver', function () {
 
 
 gulp.task('html:build', function () {
-    gulp.src(path.dev.html) 
+    gulp.src(path.dev.html)
         .pipe(rigger())
         .pipe(gulp.dest(path.build.html))
-        .pipe(reload({stream: true}));
+        .pipe(reload({
+            stream: true
+        }));
 });
 
 gulp.task('js:build', function () {
-    gulp.src(path.dev.js) 
-        .pipe(uglify()) 
+    gulp.src(path.dev.js)
+        .pipe(uglify())
         .pipe(gulp.dest(path.build.js))
-        .pipe(reload({stream: true}));
+        .pipe(reload({
+            stream: true
+        }));
 });
 
 gulp.task('style:build', function () {
-    gulp.src(path.dev.style) 
-        .pipe(sourcemaps.init())
+    gulp.src(path.dev.style)
         .pipe(sass({
             includePaths: ['dev/style/'],
             errLogToConsole: true
         }))
         .pipe(prefixer())
-        //.pipe(cleanCSS()) 
-        .pipe(sourcemaps.write())
+        .pipe(cleanCSS())
         .pipe(gulp.dest(path.build.css))
-        .pipe(reload({stream: true}));
+        .pipe(reload({
+            stream: true
+        }));
 });
 
 gulp.task('image:build', function () {
@@ -87,15 +94,44 @@ gulp.task('image:build', function () {
         .pipe(tinypng({
             key: 'KpaEMOnqEvuKLm8KiTI6J_UAFKNqlUTY', //XRZuqyo6VWQvcOmvYPYprQBjS1GUcgy- ; P3jx6VFnO6SllhgMm1gktt1olcJDTYDs ;73fEeflGGhHyRfftICpYXfKDG85FCcE2
             log: true,
-            sigFile: 'build/images/.tinypng-sigs',
+            sigFile: 'dev/images/.tinypng-sigs',
             summarise: true
         }))
         .pipe(gulp.dest(path.build.img))
-        .pipe(reload({stream: true}));
+        .pipe(reload({
+            stream: true
+        }));
 });
 
+gulp.task('svg:build', function () {
+    return gulp
+        .src(path.dev.svg)
+        // minify svg
+        .pipe(svgmin({
+            js2svg: {
+                pretty: true
+            }
+        }))
+        // build svg sprite
+        .pipe(svgmin(function (file) {
+            var prefix = svgpath.basename(file.relative, svgpath.extname(file.relative));
+            return {
+                plugins: [{
+                    cleanupIDs: {
+                        prefix: prefix + '-',
+                        minify: true
+                    }
+                }]
+            }
+        }))
+        .pipe(svgstore())
+        .pipe(gulp.dest(path.build.svg))
+        .pipe(reload({
+            stream: true
+        }));
+});
 
-gulp.task('fonts:build', function() {
+gulp.task('fonts:build', function () {
     gulp.src(path.dev.fonts)
         .pipe(gulp.dest(path.build.fonts))
 });
@@ -105,24 +141,28 @@ gulp.task('build', [
     'js:build',
     'style:build',
     'fonts:build',
-    'image:build'
+    'image:build',
+    'svg:build'
 ]);
 
 
-gulp.task('watch', function(){
-    watch([path.watch.html], function(event, cb) {
+gulp.task('watch', function () {
+    watch([path.watch.html], function (event, cb) {
         gulp.start('html:build');
     });
-    watch([path.watch.style], function(event, cb) {
+    watch([path.watch.style], function (event, cb) {
         gulp.start('style:build');
     });
-    watch([path.watch.js], function(event, cb) {
+    watch([path.watch.js], function (event, cb) {
         gulp.start('js:build');
     });
-    watch([path.watch.img], function(event, cb) {
+    watch([path.watch.img], function (event, cb) {
         gulp.start('image:build');
     });
-    watch([path.watch.fonts], function(event, cb) {
+    watch([path.watch.svg], function (event, cb) {
+        gulp.start('svg:build');
+    });
+    watch([path.watch.fonts], function (event, cb) {
         gulp.start('fonts:build');
     });
 });
