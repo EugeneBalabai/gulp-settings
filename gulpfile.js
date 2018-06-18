@@ -10,6 +10,7 @@ var gulp = require('gulp'),
     svgmin = require('gulp-svgmin'),
     svgstore = require('gulp-svgstore'),
     svgpath = require('path'),
+    includes = require('gulp-file-include'),
     tinypng = require('gulp-tinypng-compress'),
     browserSync = require("browser-sync"),
     reload = browserSync.reload;
@@ -60,6 +61,10 @@ gulp.task('webserver', function () {
 gulp.task('html:build', function () {
     gulp.src(path.dev.html)
         .pipe(rigger())
+        .pipe(includes({
+            prefix: '@@',
+            basepath: '@file'
+        }))
         .pipe(gulp.dest(path.build.html))
         .pipe(reload({
             stream: true
