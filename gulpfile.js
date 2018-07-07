@@ -20,25 +20,29 @@ var path = {
         html: 'build/',
         js: 'build/js/',
         css: 'build/css/',
-        img: 'build/images/',
+        img: 'build/storage/images/',
         fonts: 'build/fonts/',
-        svg: 'build/images/'
+        svg: 'build/storage/images/',
+        svg2: 'build/storage/images/',
     },
     dev: {
         html: 'dev/*.html',
         js: 'dev/js/*.js',
         style: 'dev/style/style.scss',
-        img: 'dev/images/**/*.{png,jpg,jpeg}',
+        img: 'dev/storage/images/**/*.{png,jpg,jpeg}',
         fonts: 'dev/fonts/**/*.*',
-        svg: 'dev/images/**/*.svg'
+        svg: 'dev/storage/images/icons/**/*.svg',
+        svg2: 'dev/storage/images/*.svg'
+
     },
     watch: {
         html: 'dev/**/*.html',
         js: 'dev/js/**/*.js',
         style: 'dev/style/**/*.*',
-        img: 'dev/images/**/*.{png,jpg,jpeg}',
+        img: 'dev/storage/images/**/*.{png,jpg,jpeg}',
         fonts: 'dev/fonts/**/*.*',
-        svg: 'dev/images/**/*.svg'
+        svg: 'dev/storage/images/icons/**/*.svg',
+        svg2: 'dev/storage/images/*.svg'
     },
     clean: './build'
 };
@@ -73,7 +77,7 @@ gulp.task('html:build', function () {
 
 gulp.task('js:build', function () {
     gulp.src(path.dev.js)
-        .pipe(uglify())
+        // .pipe(uglify())
         .pipe(gulp.dest(path.build.js))
         .pipe(reload({
             stream: true
@@ -99,7 +103,7 @@ gulp.task('image:build', function () {
         .pipe(tinypng({
             key: 'KpaEMOnqEvuKLm8KiTI6J_UAFKNqlUTY', //XRZuqyo6VWQvcOmvYPYprQBjS1GUcgy- ; P3jx6VFnO6SllhgMm1gktt1olcJDTYDs ;73fEeflGGhHyRfftICpYXfKDG85FCcE2
             log: true,
-            sigFile: 'dev/images/.tinypng-sigs',
+            sigFile: 'dev/storage/images/.tinypng-sigs',
             summarise: true
         }))
         .pipe(gulp.dest(path.build.img))
@@ -115,7 +119,21 @@ gulp.task('svg:build', function () {
         .pipe(svgmin({
             js2svg: {
                 pretty: true
-            }
+            },
+            plugins: [{
+                removeDoctype: false
+            }, {
+                removeComments: true
+            }, {
+                cleanupNumericValues: {
+                    floatPrecision: 2
+                }
+            }, {
+                convertColors: {
+                    names2hex: false,
+                    rgb2hex: false
+                }
+            }]
         }))
         // build svg sprite
         .pipe(svgmin(function (file) {
@@ -124,13 +142,23 @@ gulp.task('svg:build', function () {
                 plugins: [{
                     cleanupIDs: {
                         prefix: prefix + '-',
-                        minify: true
+                        minify: false
                     }
                 }]
             }
         }))
-        .pipe(svgstore())
+        .pipe(svgstore({
+            inlineSvg: true
+        }))
         .pipe(gulp.dest(path.build.svg))
+        .pipe(reload({
+            stream: true
+        }));
+});
+gulp.task('svg2:build', function () {
+    return gulp
+        .src(path.dev.svg2)
+        .pipe(gulp.dest(path.build.svg2))
         .pipe(reload({
             stream: true
         }));
@@ -147,7 +175,8 @@ gulp.task('build', [
     'style:build',
     'fonts:build',
     'image:build',
-    'svg:build'
+    'svg:build',
+    'svg2:build'
 ]);
 
 
@@ -166,6 +195,9 @@ gulp.task('watch', function () {
     });
     watch([path.watch.svg], function (event, cb) {
         gulp.start('svg:build');
+    });
+    watch([path.watch.svg], function (event, cb) {
+        gulp.start('svg2:build');
     });
     watch([path.watch.fonts], function (event, cb) {
         gulp.start('fonts:build');
