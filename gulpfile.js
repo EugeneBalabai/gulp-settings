@@ -13,7 +13,8 @@ var gulp = require('gulp'),
   markdown = require('markdown'),
   plumber = require('gulp-plumber'),
   tinypng = require('gulp-tinypng-extended'),
-  browserSync = require('browser-sync'), //2 low severity vulnerabilities
+  browserSync = require('browser-sync'),
+  babel = require('gulp-babel'), //2 low severity vulnerabilities
   reload = browserSync.reload;
 
 var path = {
@@ -277,7 +278,7 @@ gulp.task('watch', function() {
   watch([path.watch.js], gulp.series('js:build'));
   watch([path.watch.img], gulp.series('image:build'));
   watch([path.watch.svg], gulp.series('svg:build'));
-  watch([path.watch.svg], gulp.series('svg2:build'));
+  watch([path.watch.svg2], gulp.series('svg2:build'));
   watch([path.watch.fonts], gulp.series('fonts:build'));
 });
 
